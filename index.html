@@ -1,0 +1,30 @@
+ <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="MyName" content="$myName">
+        <title>App Redirecting</title>
+        <style>
+            .word-wrap {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+        </style>
+    </head>
+    <script>
+        function deeplinkRedirect() {        
+            window.location.href = 'paypal://';
+        }
+    </script>
+    <body>
+        <div class="container">
+            <h2>App Redirect</h2>
+            <p>
+                <button onclick=deeplinkRedirect()>Deeplink redirect</button>
+                <a href="intent://www.paypal.com/mobile-app/dashboard#Intent;scheme=https;package=com.paypal.android.p2pmobile;end;">
+                    <button type="submit">Intent link redirect</button>
+                </a>
+            </p>
+            <br/>
+        </>
+    </body>
+ </html>
