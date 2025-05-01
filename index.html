@@ -57,6 +57,10 @@
             ?.split('=')[1] || '';
     }
 
+    function isSamsungBrowser() {
+        return /SamsungBrowser/i.test(navigator.userAgent);
+    }
+
     window.onload = function () {
         var cookieValue = decodeURIComponent(getCookieUrl('redirect-url'));
         if (!cookieValue || cookieValue.trim() === '') {
@@ -65,6 +69,7 @@
         }
         document.getElementById('redirect-url').value = cookieValue;
         document.getElementById('user-agent').innerText = navigator.userAgent;
+        document.getElementById('samsung-browser').innerText = "Is Samsung browser: " + isSamsungBrowser();
     };
 </script>
 
@@ -82,7 +87,11 @@
             <br>
             <br>
             <button onclick="handleIntentLaunch()">Intent link redirect</button>
+            <br>
+            <br>
             <div id="user-agent"></div>
+            <br>
+            <div id="samsung-browser"></div>
         </p>
         <br />
     </div>
