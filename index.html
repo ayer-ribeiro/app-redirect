@@ -13,48 +13,69 @@
 </head>
 <script>
     const defaultUrl = "https://www.paypal.com/mobile-app/dashboard";
+    const defaultPackageName = "com.paypal.android.p2pmobile";
 
-    function launchIntent(redirectUrl) {
+    function launchAndroidIntent(redirectUrl, packageName) {
         const encodedRedirect = redirectUrl.replace(/^https?:\/\//, '');
         const encodedFallback = encodeURIComponent(redirectUrl);
-        const intentUrl = `intent://${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=${encodedFallback};end;`;
+        const intentUrl = `intent://${encodedRedirect}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodedFallback};end;`;
         window.location.href = intentUrl;
     }
 
-    function handleIntentLaunch() {
+    function handleAndroidIntentLaunch() {
         var redirectUrl = document.getElementById('redirect-url').value;
         if (!redirectUrl || redirectUrl.trim() === '') {
-            console.log("redirectUrl is empty");
+            throw new Error('redirectUrl is empty');
             return;
         }
 
-        setCookieUrl(redirectUrl);
-        launchIntent(redirectUrl);
+        var androidPackageName = document.getElementById('android-package-name').value;
+        if (!androidPackageName || androidPackageName.trim() === '') {
+            throw new Error('android package name is empty');
+            return;
+        }
+
+        setTimeout(() => {
+            launchAndroidIntent(redirectUrl, androidPackageName);
+        }, document.getElementById('delay').value);
+
     }
 
     function handleRegularUniversalLink() {
         var redirectUrl = document.getElementById('redirect-url').value;
 
-
         if (!redirectUrl || redirectUrl.trim() === '') {
-            console.log("redirectUrl is empty");
+            throw new Error('redirectUrl is empty');
             return;
         }
 
-        setCookieUrl(redirectUrl);
-        window.location.href = redirectUrl;
+        setTimeout(() => {
+            window.location.href = redirectUrl;
+        }, document.getElementById('delay').value);
     }
 
-    function setCookieUrl(value, days = 30) {
+    function handleAdjustRedirect() {
+        const redirectUrl = document.getElementById('redirect-url').value;
+        alert('not implemented');
+        
+        setTimeout(() => {
+            // window.location.href = url;
+        }, document.getElementById('delay').value);
+
+    }
+
+    function setCookie(key, value, days = 30) {
         const expires = new Date(Date.now() + days * 864e5).toUTCString();
-        document.cookie = `redirect-url=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+        document.cookie = `${key}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
     }
 
-    function getCookieUrl() {
-        return document.cookie
+    function getCookie(key) {
+        const cookieValue = document.cookie
             .split('; ')
-            .find(row => row.startsWith('redirect-url='))
+            .find(row => row.startsWith(key))
             ?.split('=')[1] || '';
+    
+        return decodeURIComponent(cookieValue);
     }
 
     function isSamsungBrowser() {
@@ -62,14 +83,40 @@
     }
 
     window.onload = function () {
-        var cookieValue = decodeURIComponent(getCookieUrl('redirect-url'));
-        if (!cookieValue || cookieValue.trim() === '') {
-            cookieValue = defaultUrl;
-            setCookieUrl(defaultUrl);
+        var redirectUrlCookieValue = getCookie('redirect-url');
+        if (!redirectUrlCookieValue || redirectUrlCookieValue.trim() === '') {
+            redirectUrlCookieValue = defaultUrl;
+            setCookie('redirect-url', defaultUrl);
         }
-        document.getElementById('redirect-url').value = cookieValue;
+        var androidPackageNameCookieValue = getCookie('android-package-name');
+        if (!androidPackageNameCookieValue || androidPackageNameCookieValue.trim() === '') {
+            androidPackageNameCookieValue = defaultPackageName;
+            setCookie('android-package-name', defaultPackageName);
+        }
+        var delayCookieValue = getCookie('delay');
+        if (!delayCookieValue || delayCookieValue.trim() === '') {
+            delayCookieValue = 0;
+            setCookie('delay', 0);
+        }
+        document.getElementById('redirect-url').value = redirectUrlCookieValue;
+        document.getElementById('android-package-name').value = androidPackageNameCookieValue;
+        document.getElementById('delay').value = delayCookieValue;
+
         document.getElementById('user-agent').innerText = navigator.userAgent;
         document.getElementById('samsung-browser').innerText = "Is Samsung browser: " + isSamsungBrowser();
+
+        document.getElementById('redirect-url').addEventListener('input', function(event) {
+            const inputValue = event.target.value;
+            setCookie('redirect-url', inputValue);
+        });
+        document.getElementById('android-package-name').addEventListener('input', function(event) {
+            const inputValue = event.target.value;
+            setCookie('android-package-name', inputValue);
+        });
+        document.getElementById('delay').addEventListener('input', function(event) {
+            const inputValue = event.target.value;
+            setCookie('delay', inputValue);
+        });
     };
 </script>
 
@@ -83,15 +130,30 @@
             </label>
             <br>
             <br>
+            <label>
+                Android package name:<br>
+                <input type="text" id="android-package-name">
+            </label>
+            <br>
+            <br>
+            <label>
+                Delay:<br>
+                <input id="delay" type="number" name="quantity" step="1">
+            </label>
+            <br>
+            <br>
             <button onclick="handleRegularUniversalLink()">Regular universal link redirect</button>
             <br>
             <br>
-            <button onclick="handleIntentLaunch()">Intent link redirect</button>
+            <button onclick="handleAndroidIntentLaunch()">Android Intent link redirect</button>
             <br>
             <br>
-            <div id="user-agent"></div>
+            <button onclick="handleAdjustRedirect()">Adjust link redirect</button>
             <br>
-            <div id="samsung-browser"></div>
+            <br>
+        <div id="user-agent"></div>
+        <br>
+        <div id="samsung-browser"></div>
         </p>
         <br />
     </div>
